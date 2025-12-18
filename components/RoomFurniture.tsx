@@ -205,7 +205,7 @@ const RoomFurniture = React.memo(({ type, customColor, texture, opacity = 1, tra
                       <group>
                           {/* Platform */}
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#fbbf24", ...commonMatProps})} position={[0, 0.6, 0]} scale={[0.8, 0.05, 0.8]} />
-                          {/* Legs (Changed to Box for cleaner block look and removed top arch cylinders) */}
+                          {/* Legs */}
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[-0.35, 0.3, -0.35]} scale={[0.05, 0.6, 0.05]} />
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[0.35, 0.3, -0.35]} scale={[0.05, 0.6, 0.05]} />
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[-0.35, 0.3, 0.35]} scale={[0.05, 0.6, 0.05]} />
@@ -221,18 +221,15 @@ const RoomFurniture = React.memo(({ type, customColor, texture, opacity = 1, tra
                               <mesh geometry={cylinderGeo} material={new THREE.MeshStandardMaterial({color: "#6b7280", ...commonMatProps})} position={[0, 0.2, 0]} rotation={[0,0,1.57]} scale={[0.03, 0.4, 0.03]} />
                           </group>
 
-                          {/* Safety Railing Posts (Corners) - Replaces Solid Panels */}
+                          {/* Safety Railing Posts */}
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[-0.35, 0.85, -0.35]} scale={[0.05, 0.5, 0.05]} />
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[0.35, 0.85, -0.35]} scale={[0.05, 0.5, 0.05]} />
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[-0.35, 0.85, 0.35]} scale={[0.05, 0.5, 0.05]} />
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[0.35, 0.85, 0.35]} scale={[0.05, 0.5, 0.05]} />
-
-                          {/* Horizontal Rails (Sides) */}
-                          {/* Left Side Rails */}
+                          
+                          {/* Side Rails */}
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[-0.35, 1.05, 0]} scale={[0.05, 0.05, 0.7]} />
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[-0.35, 0.85, 0]} scale={[0.05, 0.05, 0.7]} />
-                          
-                          {/* Right Side Rails */}
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[0.35, 1.05, 0]} scale={[0.05, 0.05, 0.7]} />
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[0.35, 0.85, 0]} scale={[0.05, 0.05, 0.7]} />
                       </group>
@@ -240,9 +237,7 @@ const RoomFurniture = React.memo(({ type, customColor, texture, opacity = 1, tra
                   {col === 2 && row === 4 && (
                       // Slide Ramp (Bottom)
                       <group position={[0, 0, -0.5]}>
-                          {/* Ramp connecting from (2,3) */}
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#f59e0b", ...commonMatProps})} position={[0, 0.3, 0.1]} rotation={[0.45, 0, 0]} scale={[0.6, 0.05, 1.3]} />
-                          {/* Side guards for ramp */}
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[-0.32, 0.35, 0.1]} rotation={[0.45, 0, 0]} scale={[0.05, 0.15, 1.3]} />
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[0.32, 0.35, 0.1]} rotation={[0.45, 0, 0]} scale={[0.05, 0.15, 1.3]} />
                       </group>
@@ -265,21 +260,16 @@ const RoomFurniture = React.memo(({ type, customColor, texture, opacity = 1, tra
                       </group>
                   )}
 
-                  {/* (4,4): Stacked Tower (Keep existing) */}
+                  {/* (4,4): Stacked Tower */}
                   {col === 4 && row === 4 && (() => {
                       const blockSize = 0.25;
                       const blockGeo = boxGeo;
                       return (
                           <group position={[0, 0, 0]}>
-                                  {/* Bottom: Teal */}
                                   <mesh geometry={blockGeo} material={new THREE.MeshStandardMaterial({color: "#06b6d4", ...commonMatProps})} position={[0, blockSize/2, 0]} rotation={[0, 0.1, 0]} scale={[blockSize, blockSize, blockSize]} />
-                                  {/* 2: Purple */}
                                   <mesh geometry={blockGeo} material={new THREE.MeshStandardMaterial({color: "#a855f7", ...commonMatProps})} position={[0, blockSize*1.5, 0]} rotation={[0, -0.2, 0]} scale={[blockSize, blockSize, blockSize]} />
-                                  {/* 3: Orange */}
                                   <mesh geometry={blockGeo} material={new THREE.MeshStandardMaterial({color: "#f97316", ...commonMatProps})} position={[0, blockSize*2.5, 0]} rotation={[0, 0.15, 0]} scale={[blockSize, blockSize, blockSize]} />
-                                  {/* 4: Blue */}
                                   <mesh geometry={blockGeo} material={new THREE.MeshStandardMaterial({color: "#3b82f6", ...commonMatProps})} position={[0, blockSize*3.5, 0]} rotation={[0, -0.05, 0]} scale={[blockSize, blockSize, blockSize]} />
-                                  {/* Top: Red */}
                                   <mesh geometry={blockGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[0, blockSize*4.5, 0]} rotation={[0, 0.3, 0]} scale={[blockSize, blockSize, blockSize]} />
                           </group>
                       );
@@ -288,27 +278,20 @@ const RoomFurniture = React.memo(({ type, customColor, texture, opacity = 1, tra
                   {/* (4,3): Storage Rack */}
                   {col === 4 && row === 3 && (
                       <group rotation={[0, -Math.PI/2, 0]}>
-                          {/* Rack Frame - Vertical Posts (Birch Wood) */}
+                          {/* Rack Frame */}
                           <mesh geometry={boxGeo} material={woodMat} position={[-0.42, 0.45, -0.2]} scale={[0.05, 0.9, 0.05]} />
                           <mesh geometry={boxGeo} material={woodMat} position={[0.42, 0.45, -0.2]} scale={[0.05, 0.9, 0.05]} />
                           <mesh geometry={boxGeo} material={woodMat} position={[-0.42, 0.45, -0.45]} scale={[0.05, 0.9, 0.05]} />
                           <mesh geometry={boxGeo} material={woodMat} position={[0.42, 0.45, -0.45]} scale={[0.05, 0.9, 0.05]} />
-
                           {/* Shelves */}
                           <mesh geometry={boxGeo} material={woodMat} position={[0, 0.15, -0.325]} scale={[0.9, 0.04, 0.28]} />
                           <mesh geometry={boxGeo} material={woodMat} position={[0, 0.45, -0.325]} scale={[0.9, 0.04, 0.28]} />
                           <mesh geometry={boxGeo} material={woodMat} position={[0, 0.75, -0.325]} scale={[0.9, 0.04, 0.28]} />
-
-                          {/* Bins on Shelves */}
-                          {/* Bottom Shelf */}
+                          {/* Bins */}
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ef4444", ...commonMatProps})} position={[-0.25, 0.26, -0.325]} scale={[0.25, 0.18, 0.25]} />
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#3b82f6", ...commonMatProps})} position={[0.25, 0.26, -0.325]} scale={[0.25, 0.18, 0.25]} />
-                          
-                          {/* Middle Shelf */}
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#22c55e", ...commonMatProps})} position={[-0.25, 0.56, -0.325]} scale={[0.25, 0.18, 0.25]} />
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#a855f7", ...commonMatProps})} position={[0.25, 0.56, -0.325]} scale={[0.25, 0.18, 0.25]} />
-
-                          {/* Top Shelf */}
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#f97316", ...commonMatProps})} position={[-0.25, 0.86, -0.325]} scale={[0.25, 0.18, 0.25]} />
                           <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#06b6d4", ...commonMatProps})} position={[0.25, 0.86, -0.325]} scale={[0.25, 0.18, 0.25]} />
                       </group>
@@ -329,26 +312,282 @@ const RoomFurniture = React.memo(({ type, customColor, texture, opacity = 1, tra
            );
       }
       
-      // 6. South-West Decor (Floor Lamp & Side Table)
+      // 6. South-West Decor
       if (col === 0 && row === 4) {
            return (
                <group>
-                   {/* Modern Floor Lamp - Scaled Down */}
                    <mesh geometry={cylinderGeo} material={darkMat} position={[-0.1, 0.03, -0.1]} scale={[0.2, 0.06, 0.2]} />
                    <mesh geometry={cylinderGeo} material={new THREE.MeshStandardMaterial({color: "#475569", ...commonMatProps})} position={[-0.1, 0.7, -0.1]} scale={[0.03, 1.3, 0.03]} />
                    <mesh geometry={cylinderGeo} material={new THREE.MeshStandardMaterial({color: "#fef9c3", emissive: "#fef08a", emissiveIntensity: 0.5, ...commonMatProps})} position={[-0.1, 1.35, -0.1]} scale={[0.28, 0.25, 0.28]} />
-                   
-                   {/* Side Table with Magazine */}
                    <mesh geometry={cylinderGeo} material={woodMat} position={[0.3, 0.25, 0.2]} scale={[0.05, 0.5, 0.05]} />
-                   <mesh geometry={cylinderGeo} material={woodMat} position={[0.3, 0.02, 0.2]} scale={[0.25, 0.04, 0.25]} /> {/* Base */}
-                   <mesh geometry={cylinderGeo} material={woodMat} position={[0.3, 0.5, 0.2]} scale={[0.3, 0.04, 0.3]} /> {/* Top */}
-                   {/* Stack of Magazines */}
+                   <mesh geometry={cylinderGeo} material={woodMat} position={[0.3, 0.02, 0.2]} scale={[0.25, 0.04, 0.25]} />
+                   <mesh geometry={cylinderGeo} material={woodMat} position={[0.3, 0.5, 0.2]} scale={[0.3, 0.04, 0.3]} />
                    <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#ffffff", ...commonMatProps})} position={[0.3, 0.54, 0.2]} rotation={[0,0.5,0]} scale={[0.15, 0.04, 0.2]} />
                </group>
            );
       }
 
       return null;
+    }
+
+    case RoomType.OperatorySuite: {
+        const dx = variantX !== undefined ? variantX : x % 5;
+        const dy = variantY !== undefined ? variantY : y % 5;
+        const adj = getEffectiveVariant(dx, dy, rotation);
+        const col = adj.col;
+        const row = adj.row;
+
+        // Enhanced Medical Colors
+        const cabinetColor = "#f1f5f9"; // Slate-100
+        const cabinetMat = new THREE.MeshStandardMaterial({ color: cabinetColor, ...commonMatProps });
+        const upholsteryColor = customColor || "#0ea5e9"; // Sky-500
+        const upholsteryMat = new THREE.MeshStandardMaterial({ color: upholsteryColor, ...commonMatProps });
+        const metalMat = new THREE.MeshStandardMaterial({ color: "#94a3b8", roughness: 0.3, metalness: 0.6, ...commonMatProps });
+        const darkMetalMat = new THREE.MeshStandardMaterial({ color: "#475569", ...commonMatProps });
+        const screenMat = new THREE.MeshStandardMaterial({ color: "#0f172a", emissive: "#0ea5e9", emissiveIntensity: 0.2, ...commonMatProps });
+
+        // -- 1. BACK WALL CABINETRY (Row 0) --
+        if (row === 0) {
+            // Col 0: Tall Utility Cabinet
+            if (col === 0) {
+                return (
+                    <group>
+                         <mesh geometry={boxGeo} material={cabinetMat} position={[0, 1.0, -0.3]} scale={[0.9, 2.0, 0.4]} />
+                         {/* Handles */}
+                         <mesh geometry={boxGeo} material={metalMat} position={[0.25, 1.2, -0.09]} scale={[0.05, 0.4, 0.02]} />
+                         <mesh geometry={boxGeo} material={metalMat} position={[0.25, 0.5, -0.09]} scale={[0.05, 0.4, 0.02]} />
+                    </group>
+                );
+            }
+            
+            // Col 1-3: Main Counter Area
+            if (col >= 1 && col <= 3) {
+                 return (
+                     <group>
+                         {/* Base Cabinets */}
+                         <mesh geometry={boxGeo} material={cabinetMat} position={[0, 0.45, -0.3]} scale={[1, 0.9, 0.4]} />
+                         {/* Countertop */}
+                         <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({ color: "#cbd5e1", ...commonMatProps })} position={[0, 0.92, -0.28]} scale={[1, 0.05, 0.45]} />
+                         
+                         {/* Sink @ Col 2 */}
+                         {col === 2 ? (
+                             <group position={[0, 0.95, -0.3]}>
+                                 <mesh geometry={boxGeo} material={metalMat} position={[0, 0.02, 0]} scale={[0.6, 0.02, 0.3]} />
+                                 <mesh geometry={boxGeo} material={darkMetalMat} position={[0, 0.03, 0]} scale={[0.5, 0.01, 0.25]} />
+                                 {/* High Arc Faucet */}
+                                 <group position={[0, 0.1, -0.1]}>
+                                      <mesh geometry={cylinderGeo} material={metalMat} position={[0, 0.15, 0]} scale={[0.04, 0.3, 0.04]} />
+                                      <mesh geometry={boxGeo} material={metalMat} position={[0, 0.3, 0.1]} rotation={[0.5, 0, 0]} scale={[0.04, 0.04, 0.2]} />
+                                 </group>
+                             </group>
+                         ) : (
+                             // Drawers for Col 1 & 3
+                             <group position={[0, 0.45, -0.09]}>
+                                 <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({ color: "#e2e8f0", ...commonMatProps })} position={[0, 0.2, 0]} scale={[0.8, 0.01, 0.02]} />
+                                 <mesh geometry={boxGeo} material={metalMat} position={[0, 0.3, 0]} scale={[0.4, 0.02, 0.02]} />
+                                 <mesh geometry={boxGeo} material={metalMat} position={[0, 0.0, 0]} scale={[0.4, 0.02, 0.02]} />
+                                 <mesh geometry={boxGeo} material={metalMat} position={[0, -0.3, 0]} scale={[0.4, 0.02, 0.02]} />
+                             </group>
+                         )}
+
+                         {/* Upper Cabinets - Variable Height */}
+                         <group position={[0, 1.8, -0.3]}>
+                             <mesh geometry={boxGeo} material={cabinetMat} scale={[0.95, 0.6, 0.4]} />
+                             {/* Glass inserts for Col 1 & 3 */}
+                             {col !== 2 && (
+                                 <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({ color: "#94a3b8", opacity: 0.5, transparent: true })} position={[0, 0, 0.21]} scale={[0.8, 0.5, 0.01]} />
+                             )}
+                         </group>
+
+                         {/* Backsplash */}
+                         <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({ color: "#f8fafc", ...commonMatProps })} position={[0, 1.35, -0.48]} scale={[1, 0.9, 0.05]} />
+                     </group>
+                 );
+            }
+
+            // Col 4: Multi-Stream Clinical Waste Station - REVISED TO MATCH THREE SEPARATE BINS
+            if (col === 4) {
+                 const binLidMat = new THREE.MeshStandardMaterial({ color: "#ffffff", ...commonMatProps });
+                 const pedalMat = new THREE.MeshStandardMaterial({ color: "#64748b", ...commonMatProps });
+                 const binHeight = 0.75;
+                 const binRadius = 0.13;
+
+                 const WasteBin = ({ color, labelColor }: { color: string, labelColor: string }) => (
+                    <group>
+                        {/* Bin Body */}
+                        <mesh geometry={cylinderGeo} material={new THREE.MeshStandardMaterial({ color, ...commonMatProps })} position={[0, binHeight/2, 0]} scale={[binRadius, binHeight, binRadius]} />
+                        {/* Bin Lid */}
+                        <mesh geometry={cylinderGeo} material={binLidMat} position={[0, binHeight, 0]} scale={[binRadius * 1.1, 0.04, binRadius * 1.1]} />
+                        {/* Lid Handle */}
+                        <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({color: "#cbd5e1"})} position={[0, binHeight + 0.04, 0]} scale={[0.08, 0.02, 0.02]} />
+                        {/* Front Label */}
+                        <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({ color: labelColor, ...commonMatProps })} position={[0, binHeight * 0.7, binRadius - 0.01]} scale={[0.12, 0.08, 0.02]} />
+                        {/* Foot Pedal */}
+                        <mesh geometry={boxGeo} material={pedalMat} position={[0, 0.02, binRadius + 0.02]} scale={[0.08, 0.04, 0.1]} />
+                    </group>
+                 );
+
+                 return (
+                     <group position={[0, 0, -0.2]}>
+                         {/* Low Base Stand */}
+                         <mesh geometry={boxGeo} material={cabinetMat} position={[0, 0.05, 0]} scale={[0.95, 0.1, 0.45]} />
+                         <mesh geometry={boxGeo} material={darkMetalMat} position={[0, 0.01, 0]} scale={[0.95, 0.02, 0.45]} />
+
+                         {/* Three Separate Color-Coded Bins */}
+                         {/* 1. Biohazard (Red) */}
+                         <group position={[-0.3, 0.1, 0]}>
+                            <WasteBin color="#1E88E5" labelColor="#0D47A1" />
+                         </group>
+                         
+                         {/* 2. Clinical/General (Grey/Silver) */}
+                         <group position={[0, 0.1, 0]}>
+                            <WasteBin color="#43A047" labelColor="#1B5E20" />
+                         </group>
+
+                         {/* 3. Sharps/Hazardous (Yellow) */}
+                         <group position={[0.3, 0.1, 0]}>
+                            <WasteBin color="#FDD835" labelColor="#F9A825" />
+                         </group>
+
+                         {/* Identification wall behind bins */}
+                         <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({ color: "#f8fafc", ...commonMatProps })} position={[0, 0.6, -0.22]} scale={[1.0, 1.2, 0.02]} />
+                     </group>
+                 );
+            }
+        }
+
+        // -- 3. DENTAL CHAIR ASSEMBLY (Centered at 2, 2 but extending visually) --
+        if (row === 2 && col === 2) {
+            // "Adjust orientation slightly inward" -> Slight Rotation
+            const chairRot = -0.15; // ~8.5 degrees
+            
+            return (
+                <group rotation={[0, chairRot, 0]} position={[0, 0, 0.2]}> 
+                    {/* Floor Plate */}
+                    <mesh geometry={boxGeo} material={cabinetMat} position={[0, 0.02, 0.5]} scale={[0.8, 0.04, 1.8]} />
+
+                    {/* Chair Base / Lift */}
+                    <mesh geometry={cylinderGeo} material={cabinetMat} position={[0, 0.3, 0]} scale={[0.4, 0.6, 0.4]} />
+                    
+                    {/* Seat */}
+                    <group position={[0, 0.55, 0.2]}>
+                        <mesh geometry={boxGeo} material={upholsteryMat} scale={[0.65, 0.15, 0.6]} />
+                        {/* Leg Rest (Angled) */}
+                        <mesh geometry={boxGeo} material={upholsteryMat} position={[0, -0.15, 0.5]} rotation={[0.4, 0, 0]} scale={[0.6, 0.1, 0.7]} />
+                        <mesh geometry={boxGeo} material={upholsteryMat} position={[0, -0.4, 0.86]} rotation={[0.4, 0, 0]} scale={[0.6, 0.05, 0.1]} /> {/* Foot catch */}
+                    </group>
+
+                    {/* Backrest (Reclined) */}
+                    <group position={[0, 0.6, -0.15]} rotation={[-0.3, 0, 0]}>
+                         <mesh geometry={boxGeo} material={upholsteryMat} position={[0, 0.4, 0]} scale={[0.6, 0.9, 0.1]} />
+                         {/* Headrest (Articulated) */}
+                         <mesh geometry={boxGeo} material={upholsteryMat} position={[0, 0.95, 0.05]} rotation={[0.2, 0, 0]} scale={[0.25, 0.2, 0.08]} />
+                    </group>
+
+                    {/* Armrests */}
+                    <mesh geometry={boxGeo} material={darkMetalMat} position={[-0.38, 0.7, 0.1]} scale={[0.05, 0.05, 0.4]} />
+                    <mesh geometry={boxGeo} material={darkMetalMat} position={[0.38, 0.7, 0.1]} scale={[0.05, 0.05, 0.4]} />
+
+                    {/* OVERHEAD LIGHT (Pole mounted on chair base) */}
+                    <group position={[0.45, 0, -0.2]}>
+                        <mesh geometry={cylinderGeo} material={cabinetMat} position={[0, 1.2, 0]} scale={[0.08, 2.4, 0.08]} />
+                        
+                        {/* MONITOR ARM ASSEMBLY - Corrected to show arm behind screen */}
+                        <group position={[0, 1.75, 0]} rotation={[0, -0.2, 0]}>
+                             {/* Main Pillar Clamp */}
+                             <mesh geometry={cylinderGeo} material={darkMetalMat} scale={[0.1, 0.15, 0.1]} />
+                             
+                             {/* Arm Segment 1 - Reaching Out */}
+                             <mesh geometry={boxGeo} material={darkMetalMat} position={[0, 0, 0.45]} scale={[0.04, 0.06, 0.9]} />
+                             
+                             {/* Elbow Joint */}
+                             <group position={[0, 0, 0.9]} rotation={[0, -1.2, 0]}>
+                                  <mesh geometry={cylinderGeo} material={darkMetalMat} scale={[0.05, 0.08, 0.05]} />
+                                  
+                                  {/* Arm Segment 2 - Positioned BEHIND the screen */}
+                                  <mesh geometry={boxGeo} material={darkMetalMat} position={[0, 0, 0.3]} scale={[0.04, 0.06, 0.7]} />
+                                  
+                                  {/* Monitor Attachment Group - Positioned mid-way on the second segment to reveal arm behind it */}
+                                  <group position={[0, 0, 0.65]} rotation={[0, -1.7, 0]}>
+                                       {/* Small mounting bracket connecting arm to back of screen */}
+                                       <mesh geometry={boxGeo} material={darkMetalMat} position={[0, 0, 0.03]} scale={[0.1, 0.1, 0.06]} />
+                                       
+                                       {/* The Screen Panel itself, offset forward from the arm */}
+                                       <group position={[0, 0, 0.06]} rotation={[0.2, 0, 0]}>
+                                            {/* Screen Case/Bezel */}
+                                            <mesh geometry={boxGeo} material={darkMetalMat} scale={[0.6, 0.35, 0.03]} />
+                                            {/* Screen Face (Glow) */}
+                                            <mesh geometry={boxGeo} material={screenMat} position={[0, 0, 0.02]} scale={[0.56, 0.31, 0.01]} />
+                                       </group>
+                                  </group>
+                             </group>
+                        </group>
+
+                        {/* Swing Arm for Light */}
+                        <group position={[0, 2.3, 0]} rotation={[0, 0.6, 0]}>
+                            <mesh geometry={boxGeo} material={metalMat} position={[-0.35, 0, 0]} scale={[0.7, 0.06, 0.06]} />
+                            <group position={[-0.7, -0.1, 0]}>
+                                 {/* Light Head */}
+                                 <mesh geometry={boxGeo} material={cabinetMat} scale={[0.3, 0.1, 0.2]} />
+                                 <mesh geometry={boxGeo} material={new THREE.MeshStandardMaterial({ color: "#fef08a", emissive: "#fef08a", emissiveIntensity: 1 })} position={[0, -0.05, 0]} scale={[0.25, 0.02, 0.15]} />
+                                 {/* Handles */}
+                                 <mesh geometry={cylinderGeo} material={metalMat} position={[0.2, 0, 0]} rotation={[0,0,1.57]} scale={[0.02, 0.1, 0.02]} />
+                                 <mesh geometry={cylinderGeo} material={metalMat} position={[-0.2, 0, 0]} rotation={[0,0,1.57]} scale={[0.02, 0.1, 0.02]} />
+                            </group>
+                        </group>
+                    </group>
+                </group>
+            );
+        }
+
+        // -- 4. DOCTOR'S STOOL (Col 3, Row 2) --
+        // Positioned for ergonomic reach
+        if (row === 2 && col === 1) {
+             return (
+                 <group position={[0.2, 0, -0.2]}>
+                     <mesh geometry={cylinderGeo} material={metalMat} position={[0, 0.05, 0]} scale={[0.3, 0.05, 0.3]} />
+                     <mesh geometry={cylinderGeo} material={metalMat} position={[0, 0.3, 0]} scale={[0.05, 0.6, 0.05]} />
+                     <mesh geometry={cylinderGeo} material={darkMetalMat} position={[0, 0.6, 0]} scale={[0.2, 0.08, 0.2]} />
+                 </group>
+             );
+        }
+
+        // -- 5. DOCTOR'S DELIVERY CART (Moved to Col 1, Row 3) --
+        // Mirroring position and rotation from original Col 3 position
+        if (row === 3 && col === 1) {
+             return (
+                 <group position={[0.05, 0, -0.3]} rotation={[0, -0.2, 0]}>
+                     <mesh geometry={boxGeo} material={cabinetMat} position={[0, 0.4, 0]} scale={[0.4, 0.8, 0.45]} />
+                     <mesh geometry={boxGeo} material={metalMat} position={[0, 0.82, 0]} scale={[0.5, 0.04, 0.5]} />
+                     {/* Control Pad */}
+                     <mesh geometry={boxGeo} material={screenMat} position={[0.1, 0.85, 0.1]} scale={[0.2, 0.02, 0.2]} />
+                     {/* Instrument Holders */}
+                     <group position={[-0.15, 0.9, -0.15]}>
+                         <mesh geometry={cylinderGeo} material={metalMat} rotation={[0.5, 0, 0]} scale={[0.02, 0.2, 0.02]} />
+                     </group>
+                     <group position={[-0.05, 0.9, -0.15]}>
+                         <mesh geometry={cylinderGeo} material={metalMat} rotation={[0.5, 0, 0]} scale={[0.02, 0.2, 0.02]} />
+                     </group>
+                     <group position={[0.05, 0.9, -0.15]}>
+                         <mesh geometry={cylinderGeo} material={metalMat} rotation={[0.5, 0, 0]} scale={[0.02, 0.2, 0.02]} />
+                     </group>
+                 </group>
+             );
+        }
+
+        // -- 6. ASSISTANT'S STOOL--
+        // Sitting higher, close to head
+        if (row === 2 && col === 3) {
+             return (
+                 <group position={[-0.25, 0, 0.6]}>
+                     <mesh geometry={cylinderGeo} material={metalMat} position={[0, 0.05, 0]} scale={[0.3, 0.05, 0.3]} />
+                     <mesh geometry={cylinderGeo} material={metalMat} position={[0, 0.3, 0]} scale={[0.05, 0.6, 0.05]} />
+                     <mesh geometry={cylinderGeo} material={darkMetalMat} position={[0, 0.6, 0]} scale={[0.2, 0.08, 0.2]} />
+                 </group>
+             );
+        }
+
+        return null;
     }
 
     case RoomType.ImagingSuite: {
