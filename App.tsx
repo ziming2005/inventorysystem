@@ -20,7 +20,8 @@ import { signOut } from './services/authService';
 
 // Helper to check if a room type is a large module
 const isLargeRoomType = (type: ToolMode) => {
-    return type === RoomType.WaitingRoom || 
+    return type === RoomType.WaitingRoom ||
+           type === RoomType.OperatorySuite || 
            type === RoomType.ImagingSuite;
 };
 
