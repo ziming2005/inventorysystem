@@ -27,6 +27,8 @@ const getRoomIcon = (type: RoomType) => {
   switch (type) {
     case RoomType.WaitingRoom:
       return <svg {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>;
+    case RoomType.OperatorySuite:
+      return <svg {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>;
     case RoomType.ImagingSuite:
       return <svg {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg>;
     case RoomType.StraightWall:
@@ -42,6 +44,7 @@ const getRoomIcon = (type: RoomType) => {
 
 const roomTypes = [
   RoomType.WaitingRoom,
+  RoomType.OperatorySuite,
   RoomType.ImagingSuite,
   RoomType.StraightWall,
   RoomType.Door,

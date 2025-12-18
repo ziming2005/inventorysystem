@@ -8,7 +8,7 @@ import React from 'react';
 export enum RoomType {
   None = 'None',
   WaitingRoom = 'WaitingRoom',
-  // OperatorySuite removed
+  OperatorySuite = 'OperatorySuite',
   ImagingSuite = 'ImagingSuite',
   StraightWall = 'StraightWall',
   Door = 'Door',

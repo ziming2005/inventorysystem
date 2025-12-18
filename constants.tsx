@@ -24,6 +24,13 @@ export const ROOMS: Record<RoomType, RoomConfig> = {
     color: '#fbbf24', // amber-400
     floorColor: '#f3f4f6', // slate-100 (Grey Tile)
   },
+  [RoomType.OperatorySuite]: {
+    type: RoomType.OperatorySuite,
+    name: 'Operatory',
+    description: `Treatment room (${LARGE_ROOM_SIZE}x${LARGE_ROOM_SIZE})`,
+    color: '#0ea5e9', // sky-500
+    floorColor: '#f8fafc', // slate-50 (White/Clean Tile)
+  },
   [RoomType.ImagingSuite]: {
     type: RoomType.ImagingSuite,
     name: 'Imaging Suite',
