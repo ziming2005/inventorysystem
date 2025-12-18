@@ -1,9 +1,8 @@
-
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Grid, TileData, RoomType, ToolMode, InventoryItem, PlacedWall } from './types';
 import { GRID_SIZE, LARGE_ROOM_SIZE, ROOMS } from './constants';
@@ -14,6 +13,7 @@ import TopToolbar from './components/TopToolbar';
 import StartScreen from './components/StartScreen';
 import InventoryModal from './components/InventoryModal';
 import GlobalInventoryList from './components/GlobalInventoryList';
+import ProfileModal, { UserProfile } from './components/ProfileModal';
 import { supabase } from './services/supabaseClient';
 import { fetchWorkspace, saveWorkspace } from './services/dataService';
 import { signOut } from './services/authService';
@@ -44,6 +44,36 @@ const createInitialGrid = (): Grid => {
   return grid;
 };
 
+// Cache hydration helpers - run once on module load
+const getCachedWorkspace = (): { grid: Grid; worldColor: string; floorColor: string; userId: string | null } => {
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = window.localStorage.getItem('dcd-workspace-cache');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.grid) {
+          return {
+            grid: parsed.grid,
+            worldColor: parsed.worldColor || '#bae6fd',
+            floorColor: parsed.floorColor || '#e5e7eb',
+            userId: parsed.userId || null
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse cached workspace on init', e);
+    }
+  }
+  return {
+    grid: createInitialGrid(),
+    worldColor: '#bae6fd',
+    floorColor: '#e5e7eb',
+    userId: null
+  };
+};
+
+const initialCachedState = getCachedWorkspace();
+
 function App() {
   // --- App State ---
   const [user, setUser] = useState<User | null>(null);
@@ -52,15 +82,17 @@ function App() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [grid, setGrid] = useState<Grid>(createInitialGrid);
+  
+  // Initialize grid and colors from cache for instant hydration
+  const [grid, setGrid] = useState<Grid>(initialCachedState.grid);
   
   // History State
   const [history, setHistory] = useState<Grid[]>([]);
   const [future, setFuture] = useState<Grid[]>([]);
 
-  // Colors
-  const [worldColor, setWorldColor] = useState('#bae6fd'); // sky-200 default
-  const [floorColor, setFloorColor] = useState('#e5e7eb'); // gray-200 default
+  // Colors - initialize from cache
+  const [worldColor, setWorldColor] = useState(initialCachedState.worldColor);
+  const [floorColor, setFloorColor] = useState(initialCachedState.floorColor);
 
   // Tools & Selection
   const [activeTool, setActiveTool] = useState<ToolMode>('Select');
@@ -74,56 +106,167 @@ function App() {
 
   // Global Inventory List State
   const [showGlobalInventory, setShowGlobalInventory] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  // Refs for preventing duplicate loads
+  const loadedUserIdRef = useRef<string | null>(initialCachedState.userId);
+  const isLoadingRef = useRef(false);
+
+  // Autosave refs
+  const skipNextAutosaveRef = useRef(true);
+  const autosaveTimerRef = useRef<number | null>(null);
+  const autosaveInFlightRef = useRef(false);
+  const lastSavedKeyRef = useRef<string | null>(null);
+  const pendingAutosaveRef = useRef<{ key: string; payload: { userId: string; grid: Grid; worldColor: string; floorColor: string; inventory: InventoryItem[] } } | null>(null);
 
   const isReady = !!user && !workspaceLoading && !loadingSession;
 
   // --- Auth + Workspace bootstrapping ---
   useEffect(() => {
+    let mounted = true;
+
     supabase.auth
       .getSession()
       .then(({ data }) => {
-        setUser(data.session?.user ?? null);
-        setLoadingSession(false);
+        if (mounted) {
+          setUser(data.session?.user ?? null);
+          setLoadingSession(false);
+        }
       })
-      .catch(() => setLoadingSession(false));
+      .catch(() => {
+        if (mounted) setLoadingSession(false);
+      });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      if (mounted) {
+        setUser(session?.user ?? null);
+      }
     });
 
     return () => {
+      mounted = false;
       listener.subscription.unsubscribe();
     };
   }, []);
 
-  const loadWorkspace = useCallback(async (userId: string) => {
+  const loadWorkspace = useCallback(async (userId: string, forceRemote = false) => {
+    // Prevent concurrent loads
+    if (isLoadingRef.current) return;
+
+    // If already loaded for this user and not forcing remote, skip
+    if (!forceRemote && loadedUserIdRef.current === userId) {
+      return;
+    }
+
+    // Try cache first (unless forcing remote)
+    if (!forceRemote && typeof window !== 'undefined') {
+      try {
+        const cached = window.localStorage.getItem('dcd-workspace-cache');
+        if (cached) {
+          const parsed = JSON.parse(cached) as { 
+            userId: string; 
+            grid: Grid; 
+            worldColor?: string; 
+            floorColor?: string 
+          };
+          if (parsed.userId === userId && parsed.grid) {
+            skipNextAutosaveRef.current = true;
+            setGrid(parsed.grid);
+            if (parsed.worldColor) setWorldColor(parsed.worldColor);
+            if (parsed.floorColor) setFloorColor(parsed.floorColor);
+            loadedUserIdRef.current = userId;
+            setStatusMessage('Loaded from cache');
+            setTimeout(() => setStatusMessage(null), 1500);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to parse cached workspace', err);
+      }
+    }
+
+    // Fetch from remote
+    isLoadingRef.current = true;
     setWorkspaceLoading(true);
     setStatusMessage('Loading your workspace...');
-    const stored = await fetchWorkspace(userId);
-    if (stored?.grid) {
-      setGrid(stored.grid);
-      if (stored.worldColor) setWorldColor(stored.worldColor);
-      if (stored.floorColor) setFloorColor(stored.floorColor);
-    } else {
-      setGrid(createInitialGrid());
-      setWorldColor('#bae6fd');
-      setFloorColor('#e5e7eb');
+
+    try {
+      const stored = await fetchWorkspace(userId);
+      const nextGrid = stored?.grid ?? createInitialGrid();
+      const nextWorld = stored?.worldColor ?? '#bae6fd';
+      const nextFloor = stored?.floorColor ?? '#e5e7eb';
+
+      skipNextAutosaveRef.current = true;
+      setGrid(nextGrid);
+      setWorldColor(nextWorld);
+      setFloorColor(nextFloor);
+      loadedUserIdRef.current = userId;
+
+      // Cache for quick rehydration on return
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(
+          'dcd-workspace-cache',
+          JSON.stringify({ userId, grid: nextGrid, worldColor: nextWorld, floorColor: nextFloor })
+        );
+      }
+
+      setStatusMessage(null);
+    } catch (error) {
+      console.error('Failed to load workspace', error);
+      setStatusMessage('Failed to load workspace');
+      setTimeout(() => setStatusMessage(null), 3000);
+    } finally {
+      setWorkspaceLoading(false);
+      isLoadingRef.current = false;
     }
-    setWorkspaceLoading(false);
-    setStatusMessage(null);
   }, []);
 
   useEffect(() => {
     if (!user) {
+      // User logged out - reset everything
       setGrid(createInitialGrid());
       setIsEditMode(false);
       setWorldColor('#bae6fd');
       setFloorColor('#e5e7eb');
       setStatusMessage(null);
+      setHistory([]);
+      setFuture([]);
+      setProfile(null);
+      setProfileOpen(false);
+      loadedUserIdRef.current = null;
+      skipNextAutosaveRef.current = true;
+      lastSavedKeyRef.current = null;
+      pendingAutosaveRef.current = null;
+      
+      // Clear cache on logout
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('dcd-workspace-cache');
+      }
       return;
     }
-    loadWorkspace(user.id);
+
+    // Only load if we haven't already loaded for this user
+    if (loadedUserIdRef.current !== user.id) {
+      loadWorkspace(user.id);
+    }
   }, [user, loadWorkspace]);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('profiles')
+      .select('email, full_name, company_name, phone, job_position, account_type')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error) {
+          console.warn('Failed to load profile', error);
+          return;
+        }
+        if (data) setProfile(data as UserProfile);
+      });
+  }, [user]);
   
   // --- History Logic ---
   const pushHistory = useCallback(() => {
@@ -186,9 +329,90 @@ function App() {
       });
     });
     
-    // Automatically generated from rooms - no separate mock array merge.
     return realItems;
   }, [grid]);
+
+  const runAutosave = useCallback(async (payload: { userId: string; grid: Grid; worldColor: string; floorColor: string; inventory: InventoryItem[] }, key: string) => {
+    if (autosaveInFlightRef.current) {
+      pendingAutosaveRef.current = { key, payload };
+      return;
+    }
+
+    autosaveInFlightRef.current = true;
+    setIsSaving(true);
+    try {
+      await saveWorkspace(payload);
+      lastSavedKeyRef.current = key;
+
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(
+          'dcd-workspace-cache',
+          JSON.stringify({ userId: payload.userId, grid: payload.grid, worldColor: payload.worldColor, floorColor: payload.floorColor })
+        );
+      }
+    } catch (error) {
+      console.error('Autosave failed', error);
+      setStatusMessage('Autosave failed. Check console for details.');
+      setTimeout(() => setStatusMessage(null), 3000);
+    } finally {
+      autosaveInFlightRef.current = false;
+      setIsSaving(false);
+      const pending = pendingAutosaveRef.current;
+      pendingAutosaveRef.current = null;
+      if (pending && pending.key !== lastSavedKeyRef.current) {
+        runAutosave(pending.payload, pending.key);
+      }
+    }
+  }, []);
+
+  // Automatically sync to Supabase whenever the workspace changes (debounced).
+  useEffect(() => {
+    if (!user || !isReady) return;
+
+    const payload = {
+      userId: user.id,
+      grid,
+      worldColor,
+      floorColor,
+      inventory: aggregatedInventoryItems,
+    };
+
+    const key = JSON.stringify(payload);
+
+    // Skip autosave right after hydration/load; treat current state as baseline.
+    if (skipNextAutosaveRef.current) {
+      skipNextAutosaveRef.current = false;
+      lastSavedKeyRef.current = key;
+      return;
+    }
+
+    if (key === lastSavedKeyRef.current) return;
+
+    // Keep cache updated even before the remote save completes.
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(
+        'dcd-workspace-cache',
+        JSON.stringify({ userId: user.id, grid, worldColor, floorColor })
+      );
+    }
+
+    if (autosaveTimerRef.current) {
+      window.clearTimeout(autosaveTimerRef.current);
+    }
+
+    autosaveTimerRef.current = window.setTimeout(() => {
+      setStatusMessage('Autosaving...');
+      runAutosave(payload, key).finally(() => {
+        setTimeout(() => setStatusMessage(null), 1200);
+      });
+    }, 1200);
+
+    return () => {
+      if (autosaveTimerRef.current) {
+        window.clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, [user, isReady, grid, worldColor, floorColor, aggregatedInventoryItems, runAutosave]);
 
 
   // --- Interaction Logic ---
@@ -535,8 +759,6 @@ function App() {
             const targetAnchorX = to.x - offsetX;
             const targetAnchorY = to.y - offsetY;
 
-            const anchorTileProps = prevGrid[sourceAnchorY][sourceAnchorX];
-
             // 1. Clear Old
             for (let dy = 0; dy < LARGE_ROOM_SIZE; dy++) {
                 for (let dx = 0; dx < LARGE_ROOM_SIZE; dx++) {
@@ -558,7 +780,7 @@ function App() {
                     const srcTile = prevGrid[sourceAnchorY+dy][sourceAnchorX+dx];
 
                     newGrid[ty][tx] = {
-                        ...srcTile, // Copy props like inventory, label, hasInventory from the specific tile
+                        ...srcTile,
                         x: tx, y: ty,
                         variantX: dx, variantY: dy,
                         placedWalls: oldTarget.placedWalls
@@ -672,34 +894,9 @@ function App() {
 
       setGrid(prevGrid => {
         const newGrid = prevGrid.map(row => [...row]);
-        // Only update the specific tile that was opened
-        // This prevents duplicating items across all tiles in a large room,
-        // while preserving the ability for the aggregator to find them once.
         newGrid[y][x] = { ...newGrid[y][x], inventoryItems: items };
         return newGrid;
       });
-  };
-
-  const handleSaveDesign = async () => {
-    if (!user) return;
-    setIsSaving(true);
-    setStatusMessage('Saving to Supabase...');
-    try {
-      await saveWorkspace({
-        userId: user.id,
-        grid,
-        worldColor,
-        floorColor,
-        inventory: aggregatedInventoryItems,
-      });
-      setStatusMessage('Saved to Supabase');
-    } catch (error) {
-      console.error('Save failed', error);
-      setStatusMessage('Save failed. Check console for details.');
-    } finally {
-      setIsSaving(false);
-      setTimeout(() => setStatusMessage(null), 2500);
-    }
   };
 
   const handleSignOut = async () => {
@@ -707,6 +904,10 @@ function App() {
     setUser(null);
     setIsEditMode(false);
     setShowGlobalInventory(false);
+    setProfileOpen(false);
+    lastSavedKeyRef.current = null;
+    pendingAutosaveRef.current = null;
+    skipNextAutosaveRef.current = true;
   };
 
   let selectedTileData = selectedTilePos ? grid[selectedTilePos.y][selectedTilePos.x] : null;
@@ -738,9 +939,9 @@ function App() {
           selectedTilePos={selectedTilePos}
           selectedSubTarget={selectedSubTarget}
           onInventoryClick={handleInventoryClick}
-        brushSettings={brushSettings}
-        worldColor={worldColor}
-        floorColor={floorColor}
+          brushSettings={brushSettings}
+          worldColor={worldColor}
+          floorColor={floorColor}
           readOnly={!isReady || !isEditMode}
         />
       </div>
@@ -750,43 +951,42 @@ function App() {
       {!user && !loadingSession && <StartScreen onAuthenticated={() => setStatusMessage(null)} />}
       {isReady && (
         <>
-            <TopToolbar 
-                canUndo={history.length > 0}
-                canRedo={future.length > 0}
-                onUndo={undo}
-                onRedo={redo}
-                worldColor={worldColor}
-                onWorldColorChange={setWorldColor}
-                floorColor={floorColor}
-                onFloorColorChange={setFloorColor}
-                isEditMode={isEditMode}
-                onToggleEditMode={() => {
-                  if (isEditMode) {
-                      setActiveTool('Select');
-                      setSelectedTilePos(null);
-                      setSelectedSubTarget(undefined);
-                  }
-                  setIsEditMode(!isEditMode);
-                }}
-                onShowInventory={() => setShowGlobalInventory(true)}
-                onSaveDesign={handleSaveDesign}
-                saving={isSaving}
-                userEmail={user?.email}
-                onSignOut={handleSignOut}
-            />
+	            <TopToolbar 
+	                canUndo={history.length > 0}
+	                canRedo={future.length > 0}
+	                onUndo={undo}
+	                onRedo={redo}
+	                worldColor={worldColor}
+	                onWorldColorChange={setWorldColor}
+	                floorColor={floorColor}
+	                onFloorColorChange={setFloorColor}
+	                isEditMode={isEditMode}
+	                onToggleEditMode={() => {
+	                  if (isEditMode) {
+	                      setActiveTool('Select');
+	                      setSelectedTilePos(null);
+	                      setSelectedSubTarget(undefined);
+	                  }
+	                  setIsEditMode(!isEditMode);
+	                }}
+	                onShowInventory={() => setShowGlobalInventory(true)}
+	                saving={isSaving}
+	                userEmail={user?.email}
+	                onOpenProfile={() => setProfileOpen(true)}
+	            />
             <UIOverlay
-            activeTool={activeTool}
-            onSelectTool={(t) => {
-                setActiveTool(t);
-                setBrushSettings({ rotation: 0, hasInventory: false, customColor: undefined, label: '' });
-                setSelectedTilePos(null);
-                setSelectedSubTarget(undefined);
-            }}
-            selectedTile={selectedTileData}
-            onUpdateTile={handleInspectorUpdate}
-            brushSettings={brushSettings}
-            onUpdateBrushSettings={(s) => setBrushSettings(prev => ({...prev, ...s}))}
-            isEditMode={isEditMode}
+              activeTool={activeTool}
+              onSelectTool={(t) => {
+                  setActiveTool(t);
+                  setBrushSettings({ rotation: 0, hasInventory: false, customColor: undefined, label: '' });
+                  setSelectedTilePos(null);
+                  setSelectedSubTarget(undefined);
+              }}
+              selectedTile={selectedTileData}
+              onUpdateTile={handleInspectorUpdate}
+              brushSettings={brushSettings}
+              onUpdateBrushSettings={(s) => setBrushSettings(prev => ({...prev, ...s}))}
+              isEditMode={isEditMode}
             />
         </>
       )}
@@ -803,6 +1003,13 @@ function App() {
           isOpen={showGlobalInventory}
           onClose={() => setShowGlobalInventory(false)}
           items={aggregatedInventoryItems}
+      />
+      <ProfileModal
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        profile={profile}
+        userEmail={user?.email ?? null}
+        onSignOut={handleSignOut}
       />
       {statusMessage && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/80 text-white px-4 py-2 rounded-full text-sm z-40 shadow-lg">

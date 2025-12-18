@@ -265,7 +265,13 @@ const StartScreen: React.FC<StartScreenProps> = ({ onAuthenticated }) => {
               <div>
                 <div className="flex justify-between items-center mb-2">
                     <label className="text-slate-800 text-lg font-medium">Password</label>
-                    <a href="#" className="text-[#0047AB] text-sm font-medium hover:underline">Reset Password</a>
+                    <button
+                      type="button"
+                      className="text-[#0047AB] text-sm font-medium hover:underline"
+                      onClick={(e) => { e.preventDefault(); /* TODO: implement reset flow without navigation */ }}
+                    >
+                      Reset Password
+                    </button>
                 </div>
                 <input 
                   type="password" 

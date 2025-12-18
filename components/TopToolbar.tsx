@@ -17,10 +17,9 @@ interface TopToolbarProps {
     isEditMode: boolean;
     onToggleEditMode: () => void;
     onShowInventory: () => void;
-    onSaveDesign: () => void;
     saving: boolean;
     userEmail?: string;
-    onSignOut?: () => void;
+    onOpenProfile?: () => void;
 }
 
 const TopToolbar: React.FC<TopToolbarProps> = ({
@@ -29,10 +28,9 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
     floorColor, onFloorColorChange,
     isEditMode, onToggleEditMode,
     onShowInventory,
-    onSaveDesign,
     saving,
     userEmail,
-    onSignOut
+    onOpenProfile
 }) => {
     return (
         <header className="absolute top-0 left-0 w-full h-14 z-30 bg-white border-b border-slate-200 shadow-sm flex items-center justify-between px-4 md:px-6 pointer-events-auto">
@@ -46,14 +44,10 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
 
             {/* Right: Controls */}
             <div className="flex items-center gap-4">
-                 <button
-                    onClick={onSaveDesign}
-                    disabled={saving}
-                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed text-white px-3 py-2 rounded-lg font-bold text-xs md:text-sm transition-all border border-emerald-700/40"
-                 >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11V3m0 8l-2-2m2 2l2-2M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2h-3l-2-2H10L8 5H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    {saving ? 'Saving...' : 'Sync to Supabase'}
-                 </button>
+                 <div className="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700">
+                    <span className={`h-2 w-2 rounded-full ${saving ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                    <span className="font-bold">{saving ? 'Saving…' : 'Saved'}</span>
+                 </div>
 
                  {/* Inventory Button (Available in both modes) */}
                  <button
@@ -140,13 +134,17 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
                     </button>
                  )}
                  {userEmail && (
-                    <div className="hidden lg:flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700">
-                        <span className="font-semibold">Signed in:</span>
-                        <span className="truncate max-w-[180px]">{userEmail}</span>
-                        {onSignOut && (
-                            <button onClick={onSignOut} className="text-blue-700 font-bold hover:underline text-[11px]">Sign out</button>
-                        )}
-                    </div>
+                    <button
+                      onClick={onOpenProfile}
+                      className="h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center transition-colors"
+                      title={userEmail}
+                      aria-label="Open profile"
+                      type="button"
+                    >
+                      <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </button>
                  )}
             </div>
         </header>
